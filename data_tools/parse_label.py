@@ -97,10 +97,13 @@ def parse_label(label_file, image_file, size=None):
 def check_label():
     data_root = "/data/cleaner_machine/first_batch"
     image_paths, label_paths = generate_pairs(
-        data_root, filter_path=['json_12499_4091_20191017115501'])
+        data_root, filter_path=['json_12480_4077_20191017115301'])
     total_nums = len(image_paths)
     size = (600, 600)
     for ind, image_path in enumerate(image_paths):
+        if not os.path.basename(image_path)=='IMG20190921110035.jpg':
+            continue
+
         label, success = parse_label(label_paths[ind], image_path, size=size)
         if not success:
             continue
@@ -139,5 +142,5 @@ def main():
 
 if __name__ == '__main__':
     # convert()
-    main()
-    # check_label()
+    # main()
+    check_label()

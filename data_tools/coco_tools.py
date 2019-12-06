@@ -55,8 +55,8 @@ def extract_data_from_coco(coco_dir,
         info = {'image': imgs_info, 'annotations': new_annos_info}
         coco_converter.append(info)
 
-        image = cv2.imread(image_path)
-        visualize_bbox(image, info, size=(600,600))
+        # image = cv2.imread(image_path)
+        # visualize_bbox(image, info, size=(600,600))
         sys.stdout.write('\r {}/{}'.format(ind + 1, len(imgIds)))
     sys.stdout.write('\n')
 

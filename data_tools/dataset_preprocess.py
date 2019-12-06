@@ -46,6 +46,7 @@ from random import shuffle
 import glob
 import h5py
 from PIL import Image
+import cv2
 
 
 
@@ -94,8 +95,10 @@ def copy_images():
 
 
 def read_image(image_file):
-    image = Image.open(image_file).convert("RGB")
-    image = np.array(image)
+    # image = Image.open(image_file).convert("RGB")
+    # image = np.array(image)
+    image = cv2.imread(image_file)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     return image
 
 

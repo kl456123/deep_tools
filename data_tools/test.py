@@ -62,11 +62,12 @@ def test(json_file, hdf5_dir):
 
     for image_id in range(num):
         image_fn = coco.loadImgs(int(image_id))[0]['file_name']
+        print(image_fn)
         annIds = coco.getAnnIds(imgIds=int(image_id))
         anns = coco.loadAnns(annIds)
         shape = (images_info[image_id][1], images_info[image_id][0], 3)
         image = images[image_id].reshape(shape)
-        image = image[:, :, ::-1]
+        # image = image[:, :, ::-1]
         targets = get_targets(anns)
         visualize_bbox(image, targets)
 

@@ -3,7 +3,6 @@
 from random import shuffle
 import glob
 import h5py
-from PIL import Image
 import sys
 import numpy as np
 import os
@@ -11,6 +10,11 @@ import cv2
 
 from dataset_preprocess import get_coco, read_image
 import argparse
+from coco_converter import COCOConverter
+
+# Image.Open wh
+# cv2.imread hw
+# when using PIL, you should be careful to handle rotation for images captured from mobile device
 
 
 def parse_args():
@@ -52,6 +56,7 @@ def generate_hdf5(output_dir, num_images_per_file, json_file, size=None):
             image_fn = coco.loadImgs(int(image_id))[0]['file_name']
             # image_path = table[image_fn]
             image_path = image_fn
+            # PIL ()
             image = read_image(image_path)
             if size is not None:
                 fx = size[0] / image.shape[1]
@@ -84,22 +89,70 @@ def generate_hdf5(output_dir, num_images_per_file, json_file, size=None):
         hdf5_file['train_images_info'][...] = images_info
         hdf5_file.close()
 
-def merge_hdf5(hdf5_dir, json_files):
-    files = get_hdf5_files(hdf5_dir)
-    h5_path = os.path.join(hdf5_dir, 'train_images.json')
-
-    hdf5_file = h5py.File(h5_path, mode='w')
-    dt = h5py.special_dtype(vlen=np.dtype('uint8'))
-    hdf5_file.create_dataset("train_images", (end - start, ), dtype=dt)
-    hdf5_file.create_dataset(
-        'train_images_info', (end - start, 2), dtype=np.int32)
+def merge_hdf5(hdf5_dir):
+    import glob
+    hdf5_template = os.path.join(hdf5_dir, 'train_*.hdf5')
+    files = sorted(glob.glob(hdf5_template))
+    hdf5_dbs = []
+    assert len(files)>0
+    num_files = len(files)
 
     for file in files:
+        hdf5_dbs.append(h5py.File(file, 'r'))
+
+    total_nums = sum([db['train_images'].shape[0] for db in hdf5_dbs])
+    train_images = np.concatenate([db['train_images'] for db in hdf5_dbs])
+    train_images_info = np.concatenate([db['train_images_info'] for db in hdf5_dbs])
+
+    h5_path = os.path.join(hdf5_dir, 'total_train.hdf5')
+    hdf5_file = h5py.File(h5_path, mode='w')
+    dt = h5py.special_dtype(vlen=np.dtype('uint8'))
+    hdf5_file.create_dataset("train_images", (total_nums, ), dtype=dt)
+    hdf5_file.create_dataset(
+        'train_images_info', (total_nums, 2), dtype=np.int32)
+
+
+    hdf5_file['train_images'][...] = train_images
+    hdf5_file['train_images_info'][...] = train_images_info
+    hdf5_file.close()
+
+def merge_hdf5v2(hdf5_dir_list):
+    for hdf5_dir in hdf5_dir_list:
         pass
 
-    hdf5_file['train_images'][...] = images
-    hdf5_file['train_images_info'][...] = images_info
-    hdf5_file.close()
+
+def merge_json(json_paths):
+    # import ipdb
+    # ipdb.set_trace()
+    coco_converter = COCOConverter()
+    for json_path in json_paths:
+        coco = get_coco(json_path)
+        imgIds = coco.imgs.keys()
+        for ind, imgId in enumerate(imgIds):
+            annId = coco.getAnnIds(imgId)
+            imgs_info = coco.loadImgs(imgId)[0]
+            anns_info = coco.loadAnns(annId)
+
+            width = imgs_info['width']
+            height = imgs_info['height']
+            new_annos_info = []
+            for ann_info in anns_info:
+                bbox = ann_info['bbox']
+                new_ann_info = {
+                    'xmin': bbox[0],
+                    'ymin': bbox[1],
+                    'xmax': (bbox[0] + bbox[2]) ,
+                    'ymax': (bbox[1] + bbox[3]) ,
+                    'name': coco.cats[ann_info['category_id']]['name']
+                }
+                new_annos_info.append(new_ann_info)
+            info = {'image': imgs_info, 'annotations': new_annos_info}
+            coco_converter.append(info)
+            sys.stdout.write('\r{}/{}'.format(ind, len(imgIds)))
+    coco_converter.save('./total.json')
+
+
+
 
 
 
@@ -116,6 +169,8 @@ def main():
     assert os.path.exists(args.label_json)
 
     generate_hdf5(output_dir, args.num_images_per_file, args.label_json, input_size)
+    # merge_hdf5(output_dir)
+    # merge_dataset(['/data/tmp/train.json', '/data/cleaner_machine/train.json'])
 
 
 if __name__ == '__main__':
