@@ -2,11 +2,11 @@ import cv2
 
 
 def visualize_bbox(image, labels, size=(600, 800), keep_ratio=True):
-    if keep_ratio:
-        fx = size[0] / image.shape[1]
-        image = cv2.resize(image, (0, 0), fx=fx, fy=fx)
-    else:
-        image = cv2.resize(image, size)
+    # if keep_ratio:
+        # fx = size[0] / image.shape[1]
+        # image = cv2.resize(image, (0, 0), fx=fx, fy=fx)
+    # else:
+        # image = cv2.resize(image, size)
     h, w = image.shape[:2]
     anns = labels['annotations']
     for ann in anns:

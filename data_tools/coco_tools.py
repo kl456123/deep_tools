@@ -16,7 +16,7 @@ def extract_data_from_coco(coco_dir,
                            classes,
                            classes_map,
                            converter=None,
-                           size=600):
+                           size=(160, 160)):
     coco = get_coco(ann_file)
     catIds = coco.getCatIds(classes)
     imgIds = []
@@ -37,16 +37,17 @@ def extract_data_from_coco(coco_dir,
         image_path = os.path.join(coco_dir, imgs_info['file_name'])
         width = imgs_info['width']
         height = imgs_info['height']
-        scale = size / width
+        s_x = size[0] / width
+        s_y = size[1] /height
         new_annos_info = []
         for ann_info in anns_info:
             if ann_info['category_id'] in catIds:
                 bbox = ann_info['bbox']
                 new_ann_info = {
-                    'xmin': bbox[0] * scale,
-                    'ymin': bbox[1] * scale,
-                    'xmax': (bbox[0] + bbox[2]) * scale,
-                    'ymax': (bbox[1] + bbox[3]) * scale,
+                    'xmin': bbox[0] * s_x,
+                    'ymin': bbox[1] * s_y,
+                    'xmax': (bbox[0] + bbox[2]) * s_x,
+                    'ymax': (bbox[1] + bbox[3]) * s_y,
                     'name':
                     classes_map[coco.cats[ann_info['category_id']]['name']]
                 }

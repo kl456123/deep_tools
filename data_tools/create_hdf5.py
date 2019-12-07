@@ -60,7 +60,8 @@ def generate_hdf5(output_dir, num_images_per_file, json_file, size=None):
             image = read_image(image_path)
             if size is not None:
                 fx = size[0] / image.shape[1]
-                image = cv2.resize(image, (0, 0), fx=fx, fy=fx)
+                fy = size[1] / image.shape[0]
+                image = cv2.resize(image, (0, 0), fx=fx, fy=fy)
             # im2col
             images.append(image.flatten())
             images_info.append([image.shape[1], image.shape[0]])

@@ -62,9 +62,8 @@ def parse_label(label_file, image_file, size=None):
         ih = label['result']['data'][0]['ih']
         iw = label['result']['data'][0]['iw']
         if size:
-            f = size[0] / iw
             iw = int(size[0])
-            ih = int(f * ih)
+            ih = int(size[1])
         image_info = {'file_name': file_name, 'height': ih, 'width': iw}
         annotations_info = []
 
@@ -134,13 +133,15 @@ def main():
     input_size = args.input_size
     input_dir = args.input_dir
     if len(input_size) == 1:
-        input_size = (input_size, input_size)
+        input_size = (input_size[0], input_size[0])
     assert len(input_size) == 2
     assert os.path.exists(input_dir)
-    convert(args.input_dir, args.output_path, args.input_size)
+    # import ipdb
+    # ipdb.set_trace()
+    convert(args.input_dir, args.output_path, input_size)
 
 
 if __name__ == '__main__':
     # convert()
-    # main()
-    check_label()
+    main()
+    # check_label()
