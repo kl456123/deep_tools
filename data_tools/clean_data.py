@@ -6,7 +6,7 @@ from parse_label import generate_pairs
 
 def clean():
     data_root = "/data/cleaner_machine/first_batch"
-    image_paths, label_paths = generate_pairs(data_root, filter_path=['20191107-1601'])
+    image_paths, label_paths = generate_pairs(data_root, filter_path=['20191107-1591'])
     total_nums = len(image_paths)
     for ind, image_path in enumerate(image_paths):
         with open(label_paths[ind], 'r') as f:
