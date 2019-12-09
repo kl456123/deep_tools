@@ -16,7 +16,7 @@ def extract_data_from_coco(coco_dir,
                            classes,
                            classes_map,
                            converter=None,
-                           size=(160, 160)):
+                           size=(320, 320)):
     coco = get_coco(ann_file)
     catIds = coco.getCatIds(classes)
     imgIds = []

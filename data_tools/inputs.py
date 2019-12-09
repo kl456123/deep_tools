@@ -13,6 +13,8 @@ import os
 import json
 import logging
 import sys
+from abc import abstractmethod
+from abc import ABC
 
 
 class HDF5Converter(object):
@@ -23,8 +25,7 @@ class HDF5Converter(object):
     # wh
     def __init__(self, h5_dir, size=(160, 160), max_num=1e8):
         self.h5_dir = h5_dir
-        if not os.path.exists(self.h5_dir):
-            os.makedirs(self.h5_dir)
+
 
         self.reset_buffer()
         self.input_size = size
@@ -34,6 +35,14 @@ class HDF5Converter(object):
         self.max_num_samples_per_file = max_num
 
         self._file_index = 0
+
+        if not os.path.exists(self.h5_dir):
+            os.makedirs(self.h5_dir)
+        self._file_index = 0
+        #  else:
+            #  files = sorted([file for file in os.listdir(self.h5_dir)])
+            #  self._file_index = len(files)
+            # find the
 
     def reset_buffer(self):
         self.images = []
@@ -133,7 +142,7 @@ class Preprocessor(object):
     classes_cn = [
             '背景', '人', '宠物-猫', '宠物-狗', '沙发', '桌子', '床', '粪便', '数据线', '钥匙'
         ]
-    def __init__(self, input_dir, output_dir, input_size):
+    def __init__(self, input_dir, output_dir, input_size, single_label=False):
         self.root_dir = input_dir
 
         self.logger = logging.getLogger('preprocessor')
@@ -143,7 +152,8 @@ class Preprocessor(object):
         self.label_suffix = ['.json']
 
         self.images_path, self.labels_path = self.get_paths_pair()
-        assert len(self.images_path) == len(self.labels_path)
+        if not single_label:
+            assert len(self.images_path) == len(self.labels_path)
 
         # converter
 
@@ -186,7 +196,11 @@ class Preprocessor(object):
 
     def run_single(self, index):
         image_path = self.images_path[index]
-        label_path = self.labels_path[index]
+        if len(self.labels_path)==0:
+            # if only single label file(e.g. coco)
+            label_path = index
+        else:
+            label_path = self.labels_path[index]
 
         image = self.read_image(image_path)
         labels, success = self.read_labels(label_path)
@@ -257,8 +271,8 @@ class Preprocessor(object):
 
 def main():
     input_dir = '/data/cleaner_machine/first_batch'
-    output_dir = './tmp'
-    input_size = (160, 160)
+    output_dir = '/data/tmp_memory/test_h5'
+    input_size = (320, 320)
     preprocessor = Preprocessor(input_dir, output_dir, input_size)
     preprocessor.run()
 
