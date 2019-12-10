@@ -82,7 +82,7 @@ def main():
     # label_path = '/data/COCO/annotations/instances_val2017.json'
     image_dir = '/data/COCO/train2017'
     label_path = '/data/COCO/annotations/instances_train2017.json'
-    output_dir = '/data/tmp2/test_h5_coco_train'
+    output_dir = '/data/tmp_memory/test_h5_coco'
     input_size = (320, 320)
 
     preprocessor = COCOPreprocessor(image_dir, label_path, output_dir,

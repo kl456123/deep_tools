@@ -23,7 +23,7 @@ class HDF5Converter(object):
     KEY_IMAGES_INFO = 'images_info'
 
     # wh
-    def __init__(self, h5_dir, size=(160, 160), max_num=1e8):
+    def __init__(self, h5_dir, size=(160, 160), max_num=5000):
         self.h5_dir = h5_dir
 
 
@@ -123,16 +123,20 @@ class HDF5Converter(object):
         images = []
         images_info = []
         labels_info = []
+        h5_dbs = []
         for file in files:
             h5_db = h5py.File(file, mode='r')
+            h5_dbs.append(h5_db)
             images.append(h5_db[cls.KEY_IMAGES])
             images_info.append(h5_db[cls.KEY_IMAGES_INFO])
             labels_info.append(h5_db[cls.KEY_LABELS_INFO])
         images = np.concatenate(images)
         images_info = np.concatenate(images_info)
         labels_info = np.concatenate(labels_info)
-        return images, images_info, labels_info
 
+        for h5_db in h5_dbs:
+            h5_db.close()
+        return images, images_info, labels_info
 
 class Preprocessor(object):
     classes = [
