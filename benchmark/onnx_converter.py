@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import torch
-from mobilenetv3 import MobileNetV3_Small
 
 class ONNXConverter(object):
     def __init__(self):
@@ -24,25 +23,17 @@ class ONNXConverter(object):
         self.input_names = ['input']
         self.output_names = ['output']
 
-    def prepare_model(self):
-        self.model = None
-
-    def load_weights(self, model_name=''):
-        return self
-
     def prepare(self):
         self.prepare_names()
         self.prepare_inputs()
-        self.prepare_model()
 
-    def convert(self, onnx_path):
+    def convert(self, model, onnx_path):
         #  import ipdb
         #  ipdb.set_trace()
         self.prepare()
-        self.load_weights()
 
         torch.onnx.export(
-                self.model,
+                model,
                 self.inputs,
                 onnx_path,
                 verbose=True,
@@ -58,11 +49,3 @@ class ONNXConverter(object):
         onnx.checker.check_model(model)
 
         print(onnx.helper.printable_graph(model.graph))
-
-
-class MobileNetConverter(ONNXConverter):
-    def __init__(self):
-        super().__init__()
-
-    def prepare_model(self):
-        self.model = MobileNetV3_Small()
