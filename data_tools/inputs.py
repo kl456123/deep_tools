@@ -16,6 +16,7 @@ from abc import abstractmethod
 from abc import ABC
 from logger import setup_logger
 import time
+from transformer import Transformer
 
 
 def set_breakpoint():
@@ -34,7 +35,6 @@ class HDF5Converter(object):
         self.h5_dir = h5_dir
 
         self.reset_buffer()
-        self.input_size = size
         self.num_lbl_info_cols = 5
         self.num_img_info_cols = 2
 
@@ -72,23 +72,24 @@ class HDF5Converter(object):
 
     def append(self, image, labels):
         # wh
-        input_size = self.input_size
-        # resize for image
-        #(hwc)
-        fx = input_size[0] / image.shape[1]
-        fy = input_size[1] / image.shape[0]
+        # input_size = self.input_size
+        # crop first
 
-        image = cv2.resize(image, (int(input_size[0]), int(input_size[1])))
-        self.images.append(image.flatten())
-        self.images_info.append(np.asarray(image.shape[:2]))
+        # then resize for image
+        # (hwc)
+        # fx = input_size[0] / image.shape[1]
+        # fy = input_size[1] / image.shape[0]
+
+        # image = cv2.resize(image, (int(input_size[0]), int(input_size[1])))
 
         # resize for labels
-        labels = np.asarray(labels)
-        labels[:, 0] = labels[:, 0] * fx
-        labels[:, 1] = labels[:, 1] * fy
-        labels[:, 2] = labels[:, 2] * fx
-        labels[:, 3] = labels[:, 3] * fy
+        # labels[:, 0] = labels[:, 0] * fx
+        # labels[:, 1] = labels[:, 1] * fy
+        # labels[:, 2] = labels[:, 2] * fx
+        # labels[:, 3] = labels[:, 3] * fy
 
+        self.images.append(image.flatten())
+        self.images_info.append(np.asarray(image.shape[:2]))
         self.labels_info.append(labels.flatten())
 
         if self.full:
@@ -159,9 +160,13 @@ class Preprocessor(object):
     ]
 
     def __init__(self, input_dir, output_dir, input_size, single_label=False, ignore_error=False):
-        self.root_dir = input_dir
-
         self.logger = setup_logger()
+        if not os.path.exists(input_dir):
+            self.logger.error('input_dir {} not exist'.format(input_dir))
+            raise FileNotFoundError
+        self.root_dir = input_dir
+        self.logger.info('input_dir: {}'.format(input_dir))
+        self.logger.info('output_dir: {}'.format(output_dir))
 
         self.image_suffix = ['.JPG', '.jpg', '.JPEG', '.jpeg', '.png', '.PNG']
         self.label_suffix = ['.json']
@@ -181,7 +186,8 @@ class Preprocessor(object):
 
         # converter
 
-        self.h5_converter = HDF5Converter(output_dir, input_size)
+        self.h5_converter = HDF5Converter(output_dir)
+        self.transformer = Transformer(input_size)
         self.rgb = True
 
         self.class2id = self.generate_class2id_map(self.classes)
@@ -265,11 +271,14 @@ class Preprocessor(object):
             else:
                 set_breakpoint()
 
-        if success:
-            self.h5_converter.append(image, labels)
-        else:
+        if not success:
             self.logger.error(
                 'failed to read labels or no label exist in this image')
+            return
+
+        samples = self.transformer(image, labels)
+        for image, labels in samples:
+            self.h5_converter.append(image, labels)
 
     def read_image(self, image_path):
         # using cv2 is better than PIL
@@ -324,13 +333,19 @@ class Preprocessor(object):
     def before_hook(self):
         pass
 
-    def run(self, start_ind=0):
+    def run(self, start_ind=0, end=None):
         self.logger.info('start processing ...')
         self.logger.info('Total num: {}'.format(len(self)))
         self.before_hook()
-        for ind in range(start_ind, len(self)):
+        if end is None:
+            end = len(self)
+        else:
+            end = min(len(self), end)
+
+        start_ind = min(len(self)-1, start_ind)
+        for ind in range(start_ind,  end):
             self.run_single(ind)
-            if ind and ind % 100:
+            if ind and (ind+1) % 100 == 0:
                 self.logger.info('{}/{}'.format(ind + 1, len(self)))
 
         self.after_hook()
@@ -356,14 +371,16 @@ class Preprocessor(object):
         meta_data['create_time'] = self._get_time()
         meta_data['version'] = '0.1.0'
         meta_data['max_num'] = self.h5_converter.max_num_samples_per_file
-        return meta_data
+        return str(meta_data)
 
 
 def main():
-    dir_names = ['fourth_batch', 'fifth_batch']
+    dir_names = ['third_batch', 'fifth_batch',
+                 'first_batch', 'second_batch', 'fourth_batch']
+    # dir_names = ['']
     for dir_name in dir_names:
         input_dir = '/data/cleaner_machine/{}'.format(dir_name)
-        output_dir = '/data/tmp2/{}'.format(dir_name)
+        output_dir = '/data/tmp/{}'.format(dir_name)
         input_size = (320, 320)
         preprocessor = Preprocessor(
             input_dir, output_dir, input_size, ignore_error=True)

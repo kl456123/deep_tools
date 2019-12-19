@@ -30,3 +30,9 @@ def register_handler(logger, handler, logger_level):
     handler.setLevel(logger_level)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+
+
+if __name__=='__main__':
+    logger = setup_logger('logger')
+    logger.info('sadg')
+    logger.error('asdg')

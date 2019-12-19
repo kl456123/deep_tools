@@ -38,9 +38,12 @@ class HDF5Dataset(torch.utils.data.Dataset):
 
 
 def main():
-    h5_dir = '/data/tmp2/second_batch'
+    h5_dir = '/data/tmp/fifth_batch'
     dataset = HDF5Dataset(h5_dir)
-    for sample in dataset:
+    for ind, sample in enumerate(dataset):
+        print(ind)
         dataset.vis_from_sample(sample)
-if __name__=='__main__':
+
+
+if __name__ == '__main__':
     main()

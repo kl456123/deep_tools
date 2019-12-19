@@ -4,12 +4,11 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
 
-def calc_anchor(boxes):
-    import ipdb
-    ipdb.set_trace()
-    kmeans = KMeans(n_clusters=2).fit(boxes[:, 2:])
+def calc_anchor(xy, title=''):
+    kmeans = KMeans(n_clusters=2).fit(xy)
     print(kmeans.cluster_centers_)
-    plt.scatter(boxes[:, 2], boxes[:, 3], c=kmeans.labels_)
+    plt.title(title)
+    plt.scatter(xy[:, 0], xy[:, 1], c=kmeans.labels_)
     plt.show()
 
 
@@ -37,7 +36,10 @@ def main(coco_jsons, classes_name):
 
     boxes = np.asarray(boxes)
     # print(classes_name, boxes.shape[0]/total_nums)
-    # calc_anchor(boxes)
+    xy = boxes[:, :2] + 0.5 * boxes[:, 2:]
+    wh = boxes[:, 2:]
+    calc_anchor(xy, title=classes_name[0]+' xy')
+    calc_anchor(wh, title=classes_name[0]+' wh')
     return boxes.shape[0]
 
 
@@ -60,11 +62,11 @@ if __name__ == '__main__':
         'wire', 'key'
     ]
     cocos = []
-    for coco_json in ['/data/tmp/train2.json', '/data/tmp/train.json']:
+    for coco_json in ['/data/tmp/train2.json']:
         cocos.append(get_coco(coco_json))
     results = []
     for class_name in classes_name:
         num = main(cocos, [class_name])
         results.append(num)
-    calc_weights(results)
+    # calc_weights(results)
     print(results)
