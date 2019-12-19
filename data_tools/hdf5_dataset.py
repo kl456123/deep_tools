@@ -38,7 +38,7 @@ class HDF5Dataset(torch.utils.data.Dataset):
 
 
 def main():
-    h5_dir = '/data/tmp_memory/test_h5_coco'
+    h5_dir = '/data/tmp2/second_batch'
     dataset = HDF5Dataset(h5_dir)
     for sample in dataset:
         dataset.vis_from_sample(sample)
