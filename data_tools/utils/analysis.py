@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from hdf5_dataset import HDF5Dataset
 import numpy as np
 import matplotlib.pyplot as plt
+
+from data_tools.core.hdf5_dataset import HDF5Dataset
 
 
 class Analyzer():
@@ -32,8 +33,6 @@ class Analyzer():
             if boxes.shape[0] == 0:
                 continue
             xy = (boxes[:, :2]+boxes[:, 2:])/2
-            # if xy[:, 1] < 100:
-                # self.dataset.vis_from_sample(sample)
             wh = boxes[:, 2:]-boxes[:, :2]
             xys.append(xy)
             whs.append(wh)
@@ -60,10 +59,25 @@ class Analyzer():
         plt.show()
 
 
+def parse_args():
+    import argparse
+    parser = argparse.ArgumentParser(
+        description='convert images list to hdf5 file')
+    parser.add_argument('--input_dir', type=str,
+                        help='input dir of h5', default='/data/tmp2/fifth_batch')
+    parser.add_argument('--class_name', type=str,
+                        help='class name to analysis', default='excrement')
+
+    args = parser.parse_args()
+    return args
+
+
 def main():
-    h5_dir = '/data/tmp2/third_batch'
+    args = parse_args()
+    h5_dir = args.input_dir
+    class_name = args.class_name
     analyzer = Analyzer(h5_dir)
-    analyzer.analysis(filter_names='key')
+    analyzer.analysis(filter_names=class_name)
 
 
 if __name__ == '__main__':

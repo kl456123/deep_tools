@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-
-from inputs import Preprocessor
-from dataset_preprocess import get_coco
 import os
 import numpy as np
+
+from data_tools.core.preprocessor import Preprocessor
+from data_tools.utils.util import get_coco
 
 
 class COCOPreprocessor(Preprocessor):
@@ -37,16 +37,6 @@ class COCOPreprocessor(Preprocessor):
 
         self.imgIds = imgIds
         return images_path, labels_path
-
-        boxes = np.array([self._xywh2xyxy(obj["bbox"]) for obj in ann],
-                         np.float32).reshape((-1, 4))
-        labels = np.array([self.get_label(obj["category_id"]) for obj in ann],
-                          np.int64).reshape((-1, ))
-        # remove invalid boxes
-        keep = (boxes[:, 3] > boxes[:, 1]) & (boxes[:, 2] > boxes[:, 0])
-        boxes = boxes[keep]
-        labels = labels[keep]
-        return boxes, labels
 
     def read_labels(self, label_path):
         assert isinstance(label_path, int)

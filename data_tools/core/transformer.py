@@ -4,21 +4,26 @@ import cv2
 
 
 class Transformer(object):
-    def __init__(self, input_size):
+    def __init__(self, input_size, use_crop=True):
         self.crop_list = [0.5] * 10
         self.spec_classes = [9, 8, 7]
         self.min_box_size = 16
 
         # the smallest objects should occupy some place
-        self.min_ratio = 70.0/320.0
+        self.min_ratio = 30.0/320.0
         self.input_size = input_size
+        self.use_crop = use_crop
 
     def __call__(self, *sample):
         # may be generate multiple samples
-        samples = self.crop(*sample)
+        if self.use_crop:
+            samples = self.crop(*sample)
+        else:
+            samples = [sample]
         resized_samples = []
         for sample in samples:
             resized_samples.append(self.resize(*sample))
+
         return resized_samples
 
     def crop(self, image, labels_info):
@@ -72,13 +77,13 @@ class Transformer(object):
 
         return cropped_image, labels_info, np.logical_not(keep)
 
-    def _calc_wh(self, spec_boxes, image_shape):
+    def _calc_wh(self, spec_boxes):
         spec_boxes_wh = spec_boxes[:, 2:] - spec_boxes[:, :2]
-        img_h, img_w = image_shape[:2]
-        min_w, min_h = spec_boxes_wh[:, 0].min(), spec_boxes_wh[:, 1].min()
-        min_ratio = np.sqrt((min_w*min_h*1.0)/(img_h*img_w))
-        ratio = max(self.min_ratio / min_ratio, 1)
-        return np.asarray([img_w, img_w])/ratio
+        # min_w, min_h = spec_boxes_wh[:, 0].min(), spec_boxes_wh[:, 1].min()
+        min_box_scale = np.sqrt(
+            spec_boxes_wh[:, 0] * spec_boxes_wh[:, 1]).min()
+        wh = min_box_scale/self.min_ratio
+        return wh
 
     def _calc_window(self, labels_info, image_shape):
         # calc crop window
@@ -100,7 +105,7 @@ class Transformer(object):
         xy = (window[2:]+window[:2])/2
 
         # calc wh
-        wh = self._calc_wh(boxes, image_shape)
+        wh = self._calc_wh(boxes)
 
         window = np.concatenate([xy-wh*0.5, xy+wh*0.5], axis=0)
 
@@ -115,7 +120,7 @@ class Transformer(object):
             success = False
         else:
             success = True
-        window = np.asarray([x1, y1, x2, y2]).astype(np.int)
+        window = np.ceil(np.asarray([x1, y1, x2, y2])).astype(np.int)
 
         return window, success
 

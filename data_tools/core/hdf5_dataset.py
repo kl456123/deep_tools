@@ -2,9 +2,9 @@ import torch
 import glob
 import h5py
 
-from inputs import HDF5Converter
-from inputs import Preprocessor
-from visualize import visualize_bboxv2
+from data_tools.core.hdf5_converter import HDF5Converter
+from data_tools.core.preprocessor import Preprocessor
+from data_tools.utils.visualize import visualize_bboxv2
 
 
 class HDF5Dataset(torch.utils.data.Dataset):
@@ -38,7 +38,7 @@ class HDF5Dataset(torch.utils.data.Dataset):
 
 
 def main():
-    h5_dir = '/data/tmp/fifth_batch'
+    h5_dir = '/data/test_images/test_h5'
     dataset = HDF5Dataset(h5_dir)
     for ind, sample in enumerate(dataset):
         print(ind)
