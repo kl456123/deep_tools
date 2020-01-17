@@ -7,7 +7,7 @@ class Transformer(object):
     def __init__(self, input_size, use_crop=True):
         self.crop_list = [0.5] * 10
         self.spec_classes = [9, 8, 7]
-        self.min_box_size = 16
+        self.min_box_size = 8
 
         # the smallest objects should occupy some place
         self.min_ratio = 30.0/320.0
@@ -22,7 +22,10 @@ class Transformer(object):
             samples = [sample]
         resized_samples = []
         for sample in samples:
-            resized_samples.append(self.resize(*sample))
+            resized_sample = self.resize(*sample)
+            image, labels = self.size_filter(*resized_sample)
+            if labels.shape[0] > 0:
+                resized_samples.append((image, labels))
 
         return resized_samples
 
@@ -140,4 +143,11 @@ class Transformer(object):
         labels[:, 2] = labels[:, 2] * fx
         labels[:, 3] = labels[:, 3] * fy
 
+        return image, labels
+
+    def size_filter(self, image, labels):
+        wh = labels[:, 2:4] - labels[:, :2]
+        size_cond = np.logical_and(
+            wh[:, 0] > self.min_box_size, wh[:, 1] > self.min_box_size)
+        labels = labels[size_cond]
         return image, labels

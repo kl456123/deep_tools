@@ -19,24 +19,28 @@ from data_tools.core.hdf5_converter import HDF5Converter
 
 class Preprocessor(object):
     classes = [
-        '__background__', 'person', 'pet-cat', 'pet-dog', 'sofa', 'table',
-        'bed', 'excrement', 'wire', 'key'
+        'bg', 'person', 'pet-cat', 'pet-dog', 'sofa', 'table',
+        'bed', 'excrement', 'wire', 'key', 'shoes', 'socks', 'chair'
     ]
     classes_cn = [
-        '背景', '人', '宠物-猫', '宠物-狗', '沙发', '桌子', '床', '粪便', '数据线', '钥匙'
+        '背景', '人', '宠物-猫', '宠物-狗', '沙发', '桌子', '床', '粪便', '数据线', '钥匙', '鞋', '袜子', '椅子'
     ]
 
-    def __init__(self, input_dir, output_dir, input_size, single_label=False, ignore_error=False, use_crop=True):
+    def __init__(self, input_dirs, output_dir, input_size, single_label=False, ignore_error=False, use_crop=True):
         self.logger = setup_logger()
-        if not os.path.exists(input_dir):
-            self.logger.error('input_dir {} not exist'.format(input_dir))
-            raise FileNotFoundError
-        self.root_dir = input_dir
-        self.logger.info('input_dir: {}'.format(input_dir))
+        if not isinstance(input_dirs, list):
+            input_dirs = [input_dirs]
+        for input_dir in input_dirs:
+            if not os.path.exists(input_dir):
+                self.logger.error('input_dir {} not exist'.format(input_dir))
+                raise FileNotFoundError
+        self.root_dir = input_dirs
+        for input_dir in input_dirs:
+            self.logger.info('input_dir: {}'.format(input_dir))
         self.logger.info('output_dir: {}'.format(output_dir))
 
         self.image_suffix = ['.JPG', '.jpg', '.JPEG', '.jpeg', '.png', '.PNG']
-        self.label_suffix = ['.json', '.xml']
+        self.label_suffix = ['.json', '.xml', '.txt']
         self.ignore_error = ignore_error
 
         self.images_path, self.labels_path = self.get_paths_pair()
@@ -72,7 +76,7 @@ class Preprocessor(object):
         for s in suffix:
             if os.path.exists('{}{}'.format(prefix_path, s)):
                 return s
-        self.logger.error('No any img suffix match the path')
+        self.logger.error('No any suffix match the path: {}'.format(path))
         raise RuntimeError
 
     def consist_img_lbl(self):
@@ -100,8 +104,15 @@ class Preprocessor(object):
         return id2classes
 
     def get_paths_pair(self):
-        return sorted(glob(self.root_dir, self.image_suffix)), sorted(
-            glob(self.root_dir, self.label_suffix))
+        image_paths = []
+        label_paths = []
+        for input_dir in self.root_dir:
+            image_paths.extend(glob(input_dir, self.image_suffix))
+
+        for input_dir in self.root_dir:
+            label_paths.extend(glob(input_dir, self.label_suffix))
+
+        return sorted(image_paths), sorted(label_paths)
 
     def __len__(self):
         return len(self.images_path)
@@ -124,13 +135,13 @@ class Preprocessor(object):
         except:
             if self.ignore_error:
                 success = False
-                self.error_infos.append(label_path)
             else:
                 set_breakpoint()
 
         if not success:
             self.logger.error(
                 'failed to read labels or no label exist in this image')
+            self.error_infos.append(label_path)
             return
 
         samples = self.transformer(image, labels)
@@ -142,6 +153,8 @@ class Preprocessor(object):
         image = cv2.imread(image_path)
         if self.rgb:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            for i in range(3):
+                image[:, :, i] = cv2.equalizeHist(image[:, :, i])
         return image
 
     def read_labels(self, label_path):
@@ -179,7 +192,6 @@ class Preprocessor(object):
 
     def after_hook(self):
         self.h5_converter.close()
-
         if self.error_infos:
             self.logger.info(
                 'failed nums/total nums({}/{})'.format(len(self.error_infos), len(self.images_path)))

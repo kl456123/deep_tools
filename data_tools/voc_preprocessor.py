@@ -28,13 +28,14 @@ def main():
     # dir_names = []
     # dir_names = ['']
     # for dir_name in dir_names:
-    input_dir = '/data/test_images'
-    output_dir = '/data/test_images/test_h5'
-    # input_dir = '/data/test_images/{}'.format(dir_name)
+    # input_dir = '/data/test_images'
+    # output_dir = '/data/test_images/test_h5_no_crop'
+    input_dirs = ['/data/test_images/tmp12', '/data/test_images/tmp13']
+    output_dir = '/data/test_images/enhancement'
     # output_dir = '/data/tmp2/{}'.format(dir_name)
     input_size = (320, 320)
     preprocessor = VOCPreprocessor(
-        input_dir,
+        input_dirs,
         output_dir,
         input_size,
         ignore_error=True,

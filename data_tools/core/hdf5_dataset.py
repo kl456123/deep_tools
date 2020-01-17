@@ -38,7 +38,7 @@ class HDF5Dataset(torch.utils.data.Dataset):
 
 
 def main():
-    h5_dir = '/data/test_images/test_h5'
+    h5_dir = '/data/test_images/test_h5_no_crop'
     dataset = HDF5Dataset(h5_dir)
     for ind, sample in enumerate(dataset):
         print(ind)
