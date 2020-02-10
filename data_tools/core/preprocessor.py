@@ -26,7 +26,13 @@ class Preprocessor(object):
         '背景', '人', '宠物-猫', '宠物-狗', '沙发', '桌子', '床', '粪便', '数据线', '钥匙', '鞋', '袜子', '椅子'
     ]
 
-    def __init__(self, input_dirs, output_dir, input_size, single_label=False, ignore_error=False, use_crop=True):
+    def __init__(self, input_dirs,
+                 output_dir,
+                 input_size,
+                 single_label=False,
+                 ignore_error=False,
+                 use_crop=True,
+                 unknown_cls2bg=True):
         self.logger = setup_logger()
         if not isinstance(input_dirs, list):
             input_dirs = [input_dirs]
@@ -42,6 +48,7 @@ class Preprocessor(object):
         self.image_suffix = ['.JPG', '.jpg', '.JPEG', '.jpeg', '.png', '.PNG']
         self.label_suffix = ['.json', '.xml', '.txt']
         self.ignore_error = ignore_error
+        self.unknown_cls2bg = unknown_cls2bg
 
         self.images_path, self.labels_path = self.get_paths_pair()
         if not single_label:
