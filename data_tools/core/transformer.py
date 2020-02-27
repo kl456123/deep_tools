@@ -149,5 +149,10 @@ class Transformer(object):
         wh = labels[:, 2:4] - labels[:, :2]
         size_cond = np.logical_and(
             wh[:, 0] > self.min_box_size, wh[:, 1] > self.min_box_size)
-        labels = labels[size_cond]
+        # ignore size filter for bg
+        fg_cond = labels[:, -1] > 0
+
+        cond = ~fg_cond | (fg_cond & size_cond)
+
+        labels = labels[cond]
         return image, labels

@@ -153,7 +153,7 @@ class Preprocessor(object):
 
         samples = self.transformer(image, labels)
         if len(samples) == 0:
-            set_breakpoint()
+            self.logger.warning('samples is empty after transformed')
         for image, labels in samples:
             self.h5_converter.append(image, labels)
 
