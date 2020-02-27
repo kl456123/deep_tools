@@ -14,10 +14,11 @@ class VOCPreprocessor(Preprocessor):
         root = tree.getroot()
         labels_info = []
         for member in root.findall('object'):
+            text = member.find('name').text
             label_info = []
-            for i in range(4):
-                label_info.append(int(member[4][i].text))
-            text = member[0].text
+            bndbox = member.find('bndbox')
+            for coord_name in ['xmin', 'ymin', 'xmax', 'ymax']:
+                label_info.append(int(bndbox.find(coord_name).text))
             if self.unknown_cls2bg and text not in self.class2id:
                 label_info.append(float(0))
             else:
@@ -38,7 +39,7 @@ def main():
     output_dir = '/data/test_images/test_h5_no_crop'
     # output_dir = '/data/tmp2/{}'.format(dir_name)
     input_size = (320, 320)
-    classes = ['bg', 'wire']
+    classes = ['bg', 'wire', 'shoes']
     classes_cn = ['背景', '数据线']
     VOCPreprocessor.classes = classes
     VOCPreprocessor.classes_cn = classes_cn

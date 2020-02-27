@@ -46,7 +46,7 @@ class Preprocessor(object):
         self.logger.info('output_dir: {}'.format(output_dir))
 
         self.image_suffix = ['.JPG', '.jpg', '.JPEG', '.jpeg', '.png', '.PNG']
-        self.label_suffix = ['.json', '.xml', '.txt']
+        self.label_suffix = ['.json', '.xml']
         self.ignore_error = ignore_error
         self.unknown_cls2bg = unknown_cls2bg
 
@@ -152,6 +152,8 @@ class Preprocessor(object):
             return
 
         samples = self.transformer(image, labels)
+        if len(samples) == 0:
+            set_breakpoint()
         for image, labels in samples:
             self.h5_converter.append(image, labels)
 

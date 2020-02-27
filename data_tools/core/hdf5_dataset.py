@@ -30,7 +30,7 @@ class HDF5Dataset(torch.utils.data.Dataset):
         return image, image_info, label_info
 
     def __len__(self):
-        return self
+        return self.images.shape[0]
 
     def vis_from_sample(self, sample):
         image, image_info, label_info = sample
