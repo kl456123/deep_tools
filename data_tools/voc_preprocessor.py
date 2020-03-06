@@ -35,7 +35,7 @@ def main():
     # for dir_name in dir_names:
     # input_dir = '/data/test_images'
     # output_dir = '/data/test_images/test_h5_no_crop'
-    input_dirs = ['/data/test_images']
+    input_dirs = ['/data/test_images/']
     output_dir = '/data/test_images/test_h5_no_crop'
     # output_dir = '/data/tmp2/{}'.format(dir_name)
     input_size = (320, 320)

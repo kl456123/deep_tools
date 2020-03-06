@@ -37,7 +37,7 @@ def get_classname(dirname):
         raise FileExistsError("no label file found")
     with open(label_path) as f:
         lines = f.readlines()
-    return lines[0]
+    return lines[0].strip()
 
 
 def get_frames(video_name, start_index=0):
