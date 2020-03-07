@@ -16,14 +16,16 @@ class MOTrackerWrapper(object):
             boxes: boxes bounding all objects in the first frame
         """
         labels = []
+        trackers = []
         num = len(boxes)
         for i in range(num):
             new_tracker = copy.deepcopy(self.sot_tracker)
             new_tracker.init(frame, boxes[i])
-            self.trackers.append(new_tracker)
+            trackers.append(new_tracker)
             labels.append([boxes[i][0], boxes[i][1], boxes[i][0] +
-                                boxes[i][2], boxes[i][1]+boxes[i][3], self.class_name])
+                           boxes[i][2], boxes[i][1]+boxes[i][3], self.class_name])
         self.labels = labels
+        self.trackers = trackers
 
     def filter_useless_tracker(self):
         trackers = []
@@ -33,7 +35,6 @@ class MOTrackerWrapper(object):
         self.trackers = trackers
         # reset inds
         self.uncertainty_inds = []
-
 
     def track(self, frame):
         labels = []
