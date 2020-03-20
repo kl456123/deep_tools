@@ -27,10 +27,16 @@ class HDF5Converter(object):
             os.makedirs(self.h5_dir)
         self._file_index = 0
         self.meta_data = ''
+
+        self.stored_amount = 0
         #  else:
         #  files = sorted([file for file in os.listdir(self.h5_dir)])
         #  self._file_index = len(files)
         # find the
+
+    @property
+    def total(self):
+        return self.stored_amount + len(self.images)
 
     def reset_buffer(self):
         self.images = []
@@ -86,6 +92,9 @@ class HDF5Converter(object):
         h5_db.close()
         # clear buffer
         self.reset_buffer()
+
+        # update stored amount
+        self.stored_amount += num_images
 
     def close(self):
         if not self.empty:

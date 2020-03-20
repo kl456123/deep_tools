@@ -4,10 +4,10 @@ import cv2
 
 
 class Transformer(object):
-    def __init__(self, input_size, use_crop=True):
+    def __init__(self, input_size, use_crop=False):
         self.crop_list = [0.5] * 10
         self.spec_classes = [9, 8, 7]
-        self.min_box_size = 8
+        self.min_box_size = 12
 
         # the smallest objects should occupy some place
         self.min_ratio = 30.0/320.0
@@ -147,8 +147,7 @@ class Transformer(object):
 
     def size_filter(self, image, labels):
         wh = labels[:, 2:4] - labels[:, :2]
-        size_cond = np.logical_and(
-            wh[:, 0] > self.min_box_size, wh[:, 1] > self.min_box_size)
+        size_cond = wh[:, 0] *  wh[:, 1] > self.min_box_size
         # ignore size filter for bg
         fg_cond = labels[:, -1] > 0
 

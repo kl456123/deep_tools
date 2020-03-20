@@ -1,6 +1,7 @@
 import torch
 import glob
 import h5py
+import cv2
 
 from data_tools.core.hdf5_converter import HDF5Converter
 from data_tools.core.preprocessor import Preprocessor
@@ -27,6 +28,10 @@ class HDF5Dataset(torch.utils.data.Dataset):
         im_shape = (image_info[0], image_info[1], 3)
         image = image.reshape(im_shape)
         label_info = label_info.reshape(-1, 5)
+        # convert to 3 channels gray image
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+
         return image, image_info, label_info
 
     def __len__(self):
@@ -39,6 +44,7 @@ class HDF5Dataset(torch.utils.data.Dataset):
 
 def main():
     h5_dir = '/data/test_images/test_h5_no_crop'
+    #  h5_dir = '/data/test_images/cleaner_machine'
     dataset = HDF5Dataset(h5_dir)
     for ind, sample in enumerate(dataset):
         print(ind)

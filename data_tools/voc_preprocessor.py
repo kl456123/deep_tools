@@ -35,14 +35,15 @@ def main():
     # for dir_name in dir_names:
     # input_dir = '/data/test_images'
     # output_dir = '/data/test_images/test_h5_no_crop'
-    input_dirs = ['/data/test_images/']
+    input_dirs = ['/data/test_images/tmp79']
     output_dir = '/data/test_images/test_h5_no_crop'
     # output_dir = '/data/tmp2/{}'.format(dir_name)
     input_size = (320, 320)
     classes = ['bg', 'wire', 'shoes']
-    classes_cn = ['背景', '数据线']
-    VOCPreprocessor.classes = classes
-    VOCPreprocessor.classes_cn = classes_cn
+    VOCPreprocessor.filter_class(classes)
+    print(VOCPreprocessor.classes)
+    # VOCPreprocessor.classes = classes
+    # VOCPreprocessor.classes_cn = classes_cn
     preprocessor = VOCPreprocessor(
         input_dirs,
         output_dir,
