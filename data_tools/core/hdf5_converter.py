@@ -87,7 +87,10 @@ class HDF5Converter(object):
         h5_db[self.KEY_IMAGES_INFO][...] = np.asarray(self.images_info)
 
         # add meta data
-        h5_db[self.KEY_META_DATA] = self.meta_data
+        # h5_db[self.KEY_META_DATA] = "adsga"
+        dt = h5py.special_dtype(vlen=str)
+        dset = h5_db.create_dataset(self.KEY_META_DATA, (1, ), dtype=dt)
+        dset[0] = str(self.meta_data)
 
         h5_db.close()
         # clear buffer
@@ -117,7 +120,8 @@ class HDF5Converter(object):
         images = np.concatenate(images)
         images_info = np.concatenate(images_info)
         labels_info = np.concatenate(labels_info)
+        class_names = eval(h5_dbs[0][cls.KEY_META_DATA][0])['classes']
 
         for h5_db in h5_dbs:
             h5_db.close()
-        return images, images_info, labels_info
+        return images, images_info, labels_info, class_names

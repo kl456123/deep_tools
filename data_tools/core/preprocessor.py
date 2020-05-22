@@ -247,4 +247,5 @@ class Preprocessor(ABC):
         meta_data['create_time'] = self._get_time()
         meta_data['version'] = '0.1.0'
         meta_data['max_num'] = self.h5_converter.max_num_samples_per_file
+        meta_data['classes'] = self.classes
         return str(meta_data)

@@ -13,9 +13,9 @@ class HDF5Dataset(torch.utils.data.Dataset):
         super().__init__()
         self.h5_dir = h5_dir
 
-        self.images, self.images_info, self.labels_info = HDF5Converter.load(
+        self.images, self.images_info, self.labels_info, classes = HDF5Converter.load(
             h5_dir)
-        self.classes = Preprocessor.classes
+        self.classes = classes
         self.id2classes = Preprocessor.generate_id2classes_map(self.classes)
 
     def __getitem__(self, index):
@@ -44,7 +44,7 @@ class HDF5Dataset(torch.utils.data.Dataset):
 
 def main():
     h5_dir = '/data/test_images/test_h5_no_crop'
-    #  h5_dir = '/data/test_images/cleaner_machine'
+    # h5_dir = '/data/test_images/cleaner_machine'
     dataset = HDF5Dataset(h5_dir)
     for ind, sample in enumerate(dataset):
         print(ind)

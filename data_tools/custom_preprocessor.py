@@ -44,9 +44,10 @@ class CustomPreprocessor(Preprocessor):
 
 
 def main():
-    dir_names = ['third_batch', 'fifth_batch',
-                 'first_batch', 'second_batch', 'fourth_batch']
+    # dir_names = ['third_batch', 'fifth_batch',
+                 # 'first_batch', 'second_batch', 'fourth_batch']
     # dir_names = ['first_batch']
+    dir_names = ['12687', '7941']
 
     input_dirs = [os.path.join('/data/cleaner_machine/', dir_name)
                   for dir_name in dir_names]
