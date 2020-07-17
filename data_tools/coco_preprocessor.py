@@ -34,9 +34,12 @@ class COCOPreprocessor(Preprocessor):
         labels_path = []
         classes = [c for c in self.cocomap]
         catIds = self.coco.getCatIds(classes)
-        imgIds = []
-        for catId in catIds:
-            imgIds.extend(self.coco.getImgIds(catIds=[catId]))
+        if self.unknown_cls2bg:
+            imgIds = self.coco.getImgIds()
+        else:
+            imgIds = []
+            for catId in catIds:
+                imgIds.extend(self.coco.getImgIds(catIds=[catId]))
 
         if isinstance(self.root_dir, list):
             assert len(
@@ -69,9 +72,13 @@ class COCOPreprocessor(Preprocessor):
             w = ann['bbox'][2]
             h = ann['bbox'][3]
             coco_name = self.coco.loadCats(ann['category_id'])[0]['name']
-            if coco_name not in self.cocomap:
-                continue
-            name = self.cocomap[coco_name]
+            if coco_name in self.cocomap:
+                name = self.cocomap[coco_name]
+            else:
+                if self.unknown_cls2bg:
+                    name = 'bg'
+                else:
+                    continue
             labels_info.append([
                 start_x, start_y, start_x + w, start_y + h,
                 float(self.class2id[name])

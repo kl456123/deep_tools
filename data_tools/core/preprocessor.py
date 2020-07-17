@@ -21,10 +21,12 @@ from data_tools.core.hdf5_converter import HDF5Converter
 class Preprocessor(ABC):
     classes = [
         'bg', 'person', 'pet-cat', 'pet-dog', 'sofa', 'table',
-        'bed', 'excrement', 'wire', 'key', 'shoes', 'socks', 'chair'
+        'bed', 'excrement', 'wire', 'key', 'shoes', 'socks', 'chair',
+        'power-strip', 'weighing-scale'
     ]
     classes_cn = [
-        '背景', '人', '宠物-猫', '宠物-狗', '沙发', '桌子', '床', '粪便', '数据线', '钥匙', '鞋', '袜子', '椅子'
+        '背景', '人', '宠物-猫', '宠物-狗', '沙发', '桌子', '床', '粪便', '数据线', '钥匙', '鞋',
+        '袜子', '椅子', '插线板', '体重秤'
     ]
 
     def __init__(self, input_dirs,
@@ -59,7 +61,7 @@ class Preprocessor(ABC):
                 labels_path = ['{}{}'.format(
                     self.prefix_path(path), self.label_suffix[0]) for path in self.images_path]
                 diff = set(labels_path)-set(self.labels_path)
-                self.logger.info(str(diff))
+                # self.logger.info(str(diff))
                 if self.ignore_error:
                     self.consist_img_lbl()
                 else:

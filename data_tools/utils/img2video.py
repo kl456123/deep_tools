@@ -23,7 +23,7 @@ def rename_images(image_dir):
 def to_video_helper(image_dir, image_suffix='.jpg', video_name='out', video_suffix='.mp4'):
     video_name = '{}{}'.format(video_name, video_suffix)
     command = 'ffmpeg -start_number 0 -i {}/%06d{}\
-        -vcodec libx264 {}'.format(image_dir, image_suffix,
+        -vcodec libx264 -vf "setpts=5*PTS" {}'.format(image_dir, image_suffix,
                                    os.path.join(image_dir, video_name))
     os.system(command)
 
@@ -61,7 +61,8 @@ def glob_helper(root_dir):
 
 
 if __name__ == '__main__':
-    root_dir = './'
-    img_dirs = glob_helper(root_dir)
-    for img_dir in img_dirs:
-        to_video(img_dir)
+    to_video('/home/indemind/video/闭环+拖鞋第二遍')
+    root_dir = ''
+    # img_dirs = glob_helper(root_dir)
+    # for img_dir in img_dirs:
+        # to_video(img_dir)
